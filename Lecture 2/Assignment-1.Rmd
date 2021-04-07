@@ -1,0 +1,102 @@
+---
+title: "Assignment 1"
+author: "Rushabh Barbhaya"
+date: "4/2/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Analysis Of Variance
+
+Exploring the data
+
+```{r}
+library(moments)
+data = read.csv("EspressoData.csv")
+head(data)
+str(data)
+summary(data)
+
+plot(density(data$cereme))
+qqnorm(data$cereme)
+```
+## Skewness Test
+
+$H_0:$ There is no skewness \
+$H_A:$ There is skewness in the data \
+The p-value is greater than 0.1. $\therefore$ we cannot accept the null hypothesis \
+
+```{r}
+agostino.test(data$cereme)
+```
+
+## Normality Test
+
+$H_0:$ The data is normally distributed \
+$H_A:$ The data is not normally distributed \
+p-value is less than 0.05. $\therefore$ we cannot reject the null hypothesis \
+
+```{r}
+shapiro.test(data$cereme)
+```
+
+performing log correction plotting density and residual plots \
+
+```{r}
+data$cereme2 = log(data$cereme)
+plot(density(data$cereme2))
+qqnorm(data$cereme2)
+
+agostino.test(data$cereme2)
+shapiro.test(data$cereme2)
+
+eruption.lm = lm(cereme2 ~ brewmethod, data = data)
+summary(eruption.lm)
+eruption.res = resid(eruption.lm)
+summary(eruption.res)
+plot(data$cereme2, eruption.res, ylab = "Residuals", xlab = "Brew Method", main = "data brewing method")
+abline(0,0)
+```
+
+## Variance Test
+
+$H_0:$ The variance in each group is the same \
+$H_A:$ The variance in each group is not the same \
+p-value is greater than 0.1. $\therefore$ we cannot accept the hypothesis \
+
+```{r}
+bartlett.test(data$cereme2, data$brewmethod)
+tapply(data$cereme2, data$brewmethod, var)
+```
+
+## ANOVA
+```{r}
+summary(aov(cereme2 ~ factor(brewmethod), data = data))
+model2 <- aov(cereme2 ~ factor(brewmethod), data = data)
+summary(model2)
+```
+
+## Post hoc test
+
+For pairwise test, brew method 2-3 is different from other \
+Brew method 2 has a lot of variance as compared to others \
+The effect for method 2 is too large \
+
+```{r}
+pairwise.t.test(data$cereme2, data$brewmethod, paired = FALSE, p.adjust.method = "bonferroni")
+
+library(pgirmess)
+kruskalmc(data$cereme2, factor(data$brewmethod), data = data)
+TukeyHSD(model2)
+
+library(compute.es)
+library(pastecs)
+by(data$cereme2, data$brewmethod, stat.desc)
+
+mes(3.45254057, 4.10322338, 0.24759907, 0.16980514, 9, 9)
+mes(3.66650368, 4.10322338, 0.17750446, 0.16980514, 9, 9)
+```
+
