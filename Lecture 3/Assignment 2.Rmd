@@ -60,7 +60,8 @@ $H_A:$ Performance Scores of all elderly people may not be equal  \
 \
 
 #### Summary
-
+Observations from the study were analyzed by conducting a one-way analysis of variance using R version 4.0.5. First, all assumptions are met and no adjustments were made. Conditions has a significant effect on (F(2,86), p-value < 0.05). \
+A Tukey test was performed and there was a significant difference in Task 1 and 2, also Task 2 and 3, and Task 1 and 3 (all p-values < 0.001). Cohen's D effect are too large.
 \
 ```{r assignment, results='hold', warning=FALSE}
 library(readxl)
