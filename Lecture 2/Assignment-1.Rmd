@@ -2,7 +2,7 @@
 title: "Assignment 1"
 author: "Rushabh Barbhaya"
 date: "4/2/2021"
-output: word_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
