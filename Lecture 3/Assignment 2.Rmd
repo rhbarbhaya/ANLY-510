@@ -1,0 +1,121 @@
+---
+title: "Assignment 2 - ANOVA - Blocking"
+author: "Rushabh Barbhaya"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Questions
+1. What assumption must we test to include a variable as a blocking factor?
+    + Kurtosis, Skewness, Normality, Independence of Observation, Variance test, and Additivity
+    + Blocking technique should also help us reduce the Error
+    
+2. Recognize the IV, DV, block and create a table for the following research statement.
+    + Independent Variable: Motor Skill Test (condition)
+    + Dependent Variable: Performance Score (Performance_score)
+    + Blocking Variable: Age Group (Age)
+\
+\
+
+```{r Table, warning=FALSE, echo=FALSE}
+library(knitr)
+table_fit = matrix(NA, nrow = 3, ncol = 2)
+table_fit[1,] = c("Variable", "#Levels")
+table_fit[2,] = c("Motor Skill Test", "3")
+table_fit[3,] = c("Age(Block)", "3")
+kable(table_fit, caption = "Specification Table", format = "pipe")
+
+mat_fit = matrix(NA, nrow = 4, ncol = 4)
+mat_fit[1,] = c("", "Test1", "Test2", "Test3")
+mat_fit[2,] = c("Age_60-69", "", "", "")
+mat_fit[3,] = c("Age_70_79", "", "", "")
+mat_fit[4,] = c("Age_80+", "", "", "")
+kable(mat_fit)
+```
+
+## ANOVA
+#### Hypothesis
+
+$H_0:$ Performance Scores of all elderly people are equal \
+$H_A:$ Performance Scores of all elderly people may not be equal  \
+    
+#### Assumptions
+- From the density plot, there seems to have 2 spikes which may affect our results 
+- We fail to reject the null hypothesis on kurtosis test 
+- We fail to reject the null hypothesis from skewness test 
+- We fail to reject the null hypothesis in normality test 
+- We fail to reject the null hypothesis for variance test 
+- The largest to smallest ratio of variance is less than 3. Which is not enough evidence to reject the null hypothesis 
+- Model1 --> Condition*Age, is not a significant factor 
+- Model2 --> Condition, is a significant factor 
+- Model3 --> Age, is a significant factor 
+- Model4 --> Condition+Age, is cannot be a blocker, it's a significant factor
+- Condition1 --> n = 28, Mean = 32.0714286, SD = 4.2854497
+- Condition2 --> n = 30, Mean = 27.8666667, SD = 4.5768031
+- Condition3 --> n = 31, Mean = 23.0645161, SD = 4.5529147
+\
+
+#### Summary
+
+\
+```{r assignment, results='hold', warning=FALSE}
+library(readxl)
+library(moments)
+library(pgirmess)
+library(pastecs)
+library(compute.es)
+
+data <- read_excel("Lab3.xlsx")
+summary(data)
+
+# Denisty Plot
+plot(density(data$Performance_score))
+qqnorm(data$Performance_score)
+
+# Kurtosis Test
+anscombe.test(data$Performance_score)
+
+# Skewness Test
+agostino.test(data$Performance_score)
+
+# Normality Test
+shapiro.test(data$Performance_score)
+
+#Residual Plot
+perf.lm = lm(Performance_score ~ Condition, data = data)
+perf.res = resid(perf.lm)
+plot(data$Performance_score, perf.res, ylab = "Residual", xlab = "Condition", main = "Independence of Observation")
+abline(0, 0)
+
+# Variance Test
+bartlett.test(data$Performance_score, data$Condition)
+tapply(data$Performance_score, data$Condition, var)
+
+# ANOVA with Blocking
+model1 = aov(Performance_score ~ factor(Condition)*factor(Age), data = data)
+summary(model1)
+model2 = aov(Performance_score ~ factor(Condition), data = data)
+summary(model2)
+model3 = aov(Performance_score ~ factor(Age), data = data)
+summary(model3)
+model4 = aov(Performance_score ~ factor(Condition)+factor(Age), data = data)
+summary(model4)
+
+anova(model1, model2)
+
+#Pairwise t test
+pairwise.t.test(data$Performance_score, data$Condition, paired = FALSE, p.adjust.method = "bonferroni")
+
+#Tukey's test
+TukeyHSD(model1)
+
+by(data$Performance_score, data$Condition, stat.desc)
+mes(27.8666667, 32.0714286, 4.5768031, 4.2854497, 30, 28)
+mes(23.0645161, 27.8666667, 4.5529147, 4.5768031, 31, 30)
+mes(23.0645161, 32.0714286, 4.5529147, 4.2854497, 31, 28)
+```
+
