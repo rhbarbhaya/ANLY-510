@@ -1,0 +1,7 @@
+1. Why must we include interactions in factorial experiments?
+Answer:
+  We might find factors to have no effect, while in reality they might have a large effect but only when in proportions. Therefore, it is important to make sure that interactions, particularly simpler two-way interactions, are not significant when it's possible to do so.
+
+2. If we find a higher order interaction is significant but its lower order components are not should we include the lower order components?
+Answer:
+  If we have A*B*C interaction we should perform A*B, A*C, B*C, A, B and C to ensure we get a robust estimate. Even if we do not capture the variance for the lower order components, we can account for errors.
